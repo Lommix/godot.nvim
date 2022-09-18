@@ -32,8 +32,8 @@ state.impl = {
 		run = function(data)
 			for _, line in pairs(data) do
 				if string.len(line) > 1 then
-					table.insert(M.log, line)
-					M.on_log_update(line)
+					--table.insert(M.log, line)
+					M.on_log_update(M.format_string(line))
 				end
 			end
 		end,
@@ -57,8 +57,7 @@ state.impl = {
 			M.command_current = M.command_queue[1]
 			table.remove(M.command_queue, 1)
 
-            -- ready state has to be left in the same frame, there will be no calls until next command
-
+			-- ready state has to be left in the same frame
 			M.prompt:send(M.command_current)
 			M.current_state = state.process
 			-- quit
@@ -81,13 +80,14 @@ state.impl = {
 					goto continue
 				end
 
+				line = M.format_string(line)
 				if string.find(line, "debug>") and not string.find(line, M.command_current) then
 					M.command_current = nil
 				elseif string.len(line) > 1 then
 					table.insert(M.command_output[M.command_current], line)
 					if M.command_current == "s" then
-						table.insert(M.log, line)
-						M.on_log_update(line)
+						--table.insert(M.log, line)
+						M.on_log_update(M.format_string(line))
 					end
 				end
 				::continue::
@@ -107,6 +107,11 @@ state.impl = {
 		end,
 	},
 }
+------------------------------------------------------------------------
+-- format string
+M.format_string = function(str)
+	return string.gsub(str, "%c", "")
+end
 ------------------------------------------------------------------------
 -- setup
 -- @param opts table?

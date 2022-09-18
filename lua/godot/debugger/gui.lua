@@ -76,30 +76,35 @@ end
 M.print_watcher = function(command_output)
 	local text = {}
 
-	table.insert(text, "-----------------------------------------")
-	table.insert(text, "-- Godot Debugger 0.1")
-	table.insert(text, "-----------------------------------------")
-	table.insert(text, "-- Global")
+	table.insert(text, "_________________________________________")
+	table.insert(text, "-- Godot Debugger 0.11")
+
+	table.insert(text, "")
+	table.insert(text, "_________________________________________")
+	table.insert(text, "-- global --")
 	if command_output["gv"] then
 		for _, line in pairs(command_output["gv"]) do
-			table.insert(text, "+" .. line)
+			table.insert(text, "#" .. line)
 		end
 	end
-	table.insert(text, "-----------------------------------------")
-	table.insert(text, "-- Member")
+	table.insert(text, "")
+	table.insert(text, "_________________________________________")
+	table.insert(text, "-- class --")
 	if command_output["mv"] then
 		for _, line in pairs(command_output["mv"]) do
-			table.insert(text, "+" .. line)
+			table.insert(text, "#" .. line)
 		end
 	end
-	table.insert(text, "-----------------------------------------")
-	table.insert(text, "-- Lokal")
+	table.insert(text, "")
+	table.insert(text, "_________________________________________")
+	table.insert(text, "-- current scope --")
 	if command_output["lv"] then
 		for _, line in pairs(command_output["lv"]) do
-			table.insert(text, "+" .. line)
+			table.insert(text, "#" .. line)
 		end
 	end
-	table.insert(text, "----------------------------------------")
+	table.insert(text, "")
+	table.insert(text, "________________________________________")
 	table.insert(text, "-- Stack")
 	if command_output["bt"] then
 		for _, line in pairs(command_output["bt"]) do
