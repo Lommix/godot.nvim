@@ -1,165 +1,140 @@
 local Terminal = require("toggleterm.terminal").Terminal
 
-M = {
-	prompt = nil,
-	log = {},
-	command_current = nil,
-	command_queue = {},
-	command_output = {},
-	current_state = function() end,
-	on_queue_clear = function() end,
-	on_debug_enter = function() end,
-	on_debug_exit = function() end,
-	on_stdout = function() end,
-	on_log_update = function() end,
-	request = function() end,
-	setup = function() end,
-}
+M = {}
 
+-----------------------------------------------------------
+-- private
+local _prompt = nil
+local _queue = {}
+local _request = nil
+local _response = {}
+local _callback = nil
+local _console_log_callback = nil
+-----------------------------------------------------------
+-- default config
 local config = {
 	hidden = true,
 	on_stdout = M.on_stdout,
-}
-
-local state = {
-	running = 1,
-	ready = 2,
-	process = 3,
-}
-
-state.impl = {
-	[state.running] = {
-		run = function(data)
-			for _, line in pairs(data) do
-				if string.len(line) > 1 then
-					--table.insert(M.log, line)
-					M.on_log_update(M.format_string(line))
-				end
-			end
-		end,
-		switch = function(data)
-			for _, line in pairs(data) do
-				if string.find(line, "debug>") then
-					M.current_state = state.ready
-					if M.on_debug_enter then
-						M.on_debug_enter()
-					end
-				end
-			end
-		end,
-	},
-	[state.ready] = {
-		run = function()
-			if vim.tbl_isempty(M.command_queue) then
-				return
-			end
-			-- pop command queue
-			M.command_current = M.command_queue[1]
-			table.remove(M.command_queue, 1)
-
-			-- ready state has to be left in the same frame
-			M.prompt:send(M.command_current)
-			M.current_state = state.process
-			-- quit
-			if M.command_current == "q" and M.on_debug_exit then
-				M.on_debug_exit()
-				M.command_current = nil
-				M.current_state = state.running
-			end
-
-			if M.command_current == "c" then
-				M.current_state = state.running
-				M.command_current = nil
-			end
-		end,
-	},
-	[state.process] = {
-		run = function(data)
-			for _, line in pairs(data) do
-				if string.find(line, M.command_current) then
-					goto continue
-				end
-
-				line = M.format_string(line)
-				if string.find(line, "debug>") and not string.find(line, M.command_current) then
-					M.command_current = nil
-				elseif string.len(line) > 1 then
-					table.insert(M.command_output[M.command_current], line)
-					if M.command_current == "s" then
-						--table.insert(M.log, line)
-						M.on_log_update(M.format_string(line))
-					end
-				end
-				::continue::
-			end
-		end,
-		switch = function(data)
-			for _, line in pairs(data) do
-				if string.find(line, "debug>") then
-					M.current_state = state.ready
-					if not vim.tbl_isempty(M.command_queue) then
-						state.impl[M.current_state].run()
-					else
-						M.on_queue_clear()
-					end
-				end
-			end
-		end,
+	godot_api = {
+		locals = "lv",
+		members = "mv",
+		globals = "gv",
+		print = "p",
+		trace = "bt",
+		continue = "c",
+		quit = "q",
+		step = "s",
+		keywords = {
+			prompt = "debug>",
+		},
 	},
 }
-------------------------------------------------------------------------
--- format string
-M.format_string = function(str)
-	return string.gsub(str, "%c", "")
+-----------------------------------------------------------
+-- chain next command from queue
+local process_queue = function()
+	_request = nil
+	_response = {}
+	if vim.tbl_count(_queue) > 0 then
+		local next = _queue[1]
+		table.remove(_queue, 1)
+		_callback = next.callback
+		_request = next.question
+		_prompt:send(_request)
+	end
 end
-------------------------------------------------------------------------
--- setup
--- @param opts table?
-M.setup = function(opts)
-	opts = opts or {}
-	config = vim.tbl_deep_extend("force", config, opts)
-end
--------------------------------------------------------------------
--- spawn
--- @param start_command string?
-M.spawn = function(start_command)
-	M.prompt = Terminal:new({
-		cmd = start_command,
-		hidden = true,
-		on_stdout = M.on_stdout,
-	})
-	M.current_state = state.running
-	M.prompt:spawn()
-end
--------------------------------------------------------------------
--- requesting command response
--- @param commands string|string[]
-M.request = function(commands, callback)
-	if M.current_state ~= state.ready then
-		do
-			return
+-----------------------------------------------------------
+-- on stdout handler
+local on_response = function(_, _, data)
+	for _, line in ipairs(data) do
+		line = string.gsub(line, "%c", "")
+		if string.len(line) > 0 then
+			-- current command
+			if _request and not string.find(line, _request) then
+				if string.find(line, config.godot_api.keywords.prompt) then
+					local _r = _response
+					local _c = _callback
+
+					process_queue()
+
+					if _c then
+						_c(_r)
+					end
+				else
+					table.insert(_response, line)
+				end
+			end
+			if
+				_console_log_callback
+				and (not _request or _request == "log")
+				and string.len(line) > 0
+				and not string.find(line, config.godot_api.keywords.prompt)
+			then
+				_console_log_callback(line)
+			end
 		end
 	end
-
-	if type(commands) == "string" then
-		commands = { commands }
-	end
-	M.on_queue_clear = callback
-
-	for _, command in ipairs(commands) do
-		table.insert(M.command_queue, command)
-		M.command_output[command] = {}
-	end
-
-	state.impl[M.current_state].run()
 end
--------------------------------------------------------------------
--- toggleterm stdout adapter
-M.on_stdout = function(_, _, data)
-	if M.current_state then
-		state.impl[M.current_state].run(data)
-		state.impl[M.current_state].switch(data)
+------------------------------------------------------------------------
+-- requesting commands in debug mode
+local request = function(question, callback)
+	if not _request then
+		_callback = callback
+		_request = question
+		_prompt:send(question)
+	else
+		table.insert(_queue, {
+			question = question,
+			callback = callback,
+		})
 	end
+end
+------------------------------------------------------------------------
+-- public requests
+M.request_globals = function(callback)
+	request(config.godot_api.globals, callback)
+end
+M.request_members = function(callback)
+	request(config.godot_api.members, callback)
+end
+M.request_trace = function(callback)
+	request(config.godot_api.trace, callback)
+end
+M.request_locals = function(callback)
+	request(config.godot_api.locals, callback)
+end
+M.request_step = function(callback)
+	request(config.godot_api.step, callback)
+end
+------------------------------------------------------------------------
+M.quit = function(callback)
+	_prompt:shutdown()
+	_queue = {}
+	_response = {}
+	_callback = nil
+	_request = nil
+	callback()
+end
+------------------------------------------------------------------------
+M.continue = function(callback)
+	_prompt:send(config.godot_api.continue)
+	_queue = {}
+	_response = {}
+	_callback = callback
+	_request = "log"
+end
+------------------------------------------------------------------------
+-- public spawn
+-- @param start_command string?
+M.spawn = function(start_command, on_enter_debug, on_log)
+	_console_log_callback = on_log
+	_request = "log"
+	_callback = on_enter_debug
+	_prompt = Terminal:new({
+		cmd = start_command,
+		hidden = true,
+		on_stdout = on_response,
+	})
+	_prompt:spawn()
 end
 
 return M

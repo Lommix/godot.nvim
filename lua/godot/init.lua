@@ -7,6 +7,7 @@ local config = {
 }
 
 godot.setup(config)
+
 local function map(m, k, v)
 	vim.keymap.set(m, k, v, { silent = true })
 end

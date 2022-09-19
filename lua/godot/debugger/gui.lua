@@ -6,15 +6,15 @@ local watcher_window = nil
 local console_buffer = vim.api.nvim_create_buf(true, true)
 local console_window = nil
 local code_window = nil
+
+local watcher_locals = {}
+local watcher_globals = {}
+local watcher_memebers = {}
+local watcher_trace = {}
+
 -------------------------------------------------------------------
--- setup
-M.setup = function(opts)
-	code_window = a.nvim_get_current_win()
-end
--------------------------------------------------------------------
--- build console
-M.open_console = function()
-	console_window = a.nvim_open_win(console_buffer, false, {
+local config = {
+	console_config = {
 		relative = "editor",
 		anchor = "SW",
 		width = 99999,
@@ -22,7 +22,19 @@ M.open_console = function()
 		col = 1,
 		row = 99999,
 		border = "double",
-	})
+	},
+}
+
+-------------------------------------------------------------------
+-- setup
+M.setup = function(opts)
+	config = vim.tbl_deep_extend("force", config, opts)
+	code_window = a.nvim_get_current_win()
+end
+-------------------------------------------------------------------
+-- build console
+M.open_console = function()
+	console_window = a.nvim_open_win(console_buffer, false, config.console_config)
 	a.nvim_set_current_win(code_window)
 end
 -------------------------------------------------------------------
@@ -35,14 +47,30 @@ M.open_watcher = function()
 end
 -------------------------------------------------------------------
 -- close consle
-M.close_console = function ()
+M.close_console = function()
 	if console_window and a.nvim_win_is_valid(console_window) then
 		a.nvim_win_close(console_window, true)
 	end
 end
 -------------------------------------------------------------------
+M.set_trace = function(trace)
+	watcher_trace = trace
+	if trace[1] then
+		M.jump_cursor(trace[1])
+	end
+end
+M.set_globals = function(globals)
+	watcher_globals = globals
+end
+M.set_members = function(members)
+	watcher_memebers = members
+end
+M.set_locals = function(locals)
+	watcher_locals = locals
+end
+-------------------------------------------------------------------
 -- close watcher
-M.close_watcher = function ()
+M.close_watcher = function()
 	if watcher_window and a.nvim_win_is_valid(watcher_window) then
 		a.nvim_win_close(watcher_window, true)
 	end
@@ -50,13 +78,13 @@ end
 -------------------------------------------------------------------
 -- close gui
 M.close_gui = function()
-    M.close_watcher()
-    M.close_console()
+	M.close_watcher()
+	M.close_console()
 end
 -------------------------------------------------------------------
 -- jump cursor
-M.jump_cursor = function(current_trace)
-	local file_line = string.gsub(string.match(current_trace, "res://.+:%d+"), "res://", "")
+M.jump_cursor = function(trace)
+	local file_line = string.gsub(string.match(trace, "res://.+:%d+"), "res://", "")
 	local file, line = unpack(vim.split(file_line, ":"))
 	a.nvim_set_current_win(code_window)
 	vim.cmd("e +" .. line .. " " .. file)
@@ -64,8 +92,8 @@ M.jump_cursor = function(current_trace)
 end
 -------------------------------------------------------------------
 -- print console
-M.print_console = function(line)
-	if console_window and a.nvim_win_is_valid(console_window)then
+M.console_log = function(line)
+	if console_window and a.nvim_win_is_valid(console_window) and string.len(line) then
 		local row = a.nvim_win_get_cursor(console_window)[1]
 		a.nvim_buf_set_lines(console_buffer, row + 1, row + 2, false, { line })
 		a.nvim_win_set_cursor(console_window, { row + 1, 0 })
@@ -73,7 +101,7 @@ M.print_console = function(line)
 end
 -------------------------------------------------------------------
 -- print watcher
-M.print_watcher = function(command_output)
+M.print_watcher = function()
 	local text = {}
 
 	table.insert(text, "_________________________________________")
@@ -82,32 +110,32 @@ M.print_watcher = function(command_output)
 	table.insert(text, "")
 	table.insert(text, "_________________________________________")
 	table.insert(text, "-- global --")
-	if command_output["gv"] then
-		for _, line in pairs(command_output["gv"]) do
+	if watcher_globals then
+		for _, line in pairs(watcher_globals) do
 			table.insert(text, "#" .. line)
 		end
 	end
 	table.insert(text, "")
 	table.insert(text, "_________________________________________")
 	table.insert(text, "-- class --")
-	if command_output["mv"] then
-		for _, line in pairs(command_output["mv"]) do
+	if watcher_memebers then
+		for _, line in pairs(watcher_memebers) do
 			table.insert(text, "#" .. line)
 		end
 	end
 	table.insert(text, "")
 	table.insert(text, "_________________________________________")
-	table.insert(text, "-- current scope --")
-	if command_output["lv"] then
-		for _, line in pairs(command_output["lv"]) do
+	table.insert(text, "-- scope --")
+	if watcher_locals then
+		for _, line in pairs(watcher_locals) do
 			table.insert(text, "#" .. line)
 		end
 	end
 	table.insert(text, "")
 	table.insert(text, "________________________________________")
-	table.insert(text, "-- Stack")
-	if command_output["bt"] then
-		for _, line in pairs(command_output["bt"]) do
+	table.insert(text, "-- stack")
+	if watcher_trace then
+		for _, line in pairs(watcher_trace) do
 			table.insert(text, line)
 		end
 	end
