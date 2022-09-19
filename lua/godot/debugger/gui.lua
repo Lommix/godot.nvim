@@ -13,28 +13,17 @@ local watcher_memebers = {}
 local watcher_trace = {}
 
 -------------------------------------------------------------------
-local config = {
-	console_config = {
-		relative = "editor",
-		anchor = "SW",
-		width = 99999,
-		height = 10,
-		col = 1,
-		row = 99999,
-		border = "double",
-	},
-}
-
+local config = {}
 -------------------------------------------------------------------
 -- setup
 M.setup = function(opts)
-	config = vim.tbl_deep_extend("force", config, opts)
+	config = opts
 	code_window = a.nvim_get_current_win()
 end
 -------------------------------------------------------------------
 -- build console
 M.open_console = function()
-	console_window = a.nvim_open_win(console_buffer, false, config.console_config)
+	console_window = a.nvim_open_win(console_buffer, false, config.gui.console_config)
 	a.nvim_set_current_win(code_window)
 end
 -------------------------------------------------------------------

@@ -1,31 +1,37 @@
 local M = {}
-local godot = require("godot.debugger")
+-------------------------------------------------------------------
+M.debugger = require("godot.debugger")
+-------------------------------------------------------------------
+-- default config
 local config = {
-	mappings = {
-		debug = "<leader>dr",
+	bin = "godot",
+	gui = {
+		console_config = {
+			relative = "editor",
+			anchor = "SW",
+			width = 99999,
+			height = 10,
+			col = 1,
+			row = 99999,
+			border = "double",
+		},
 	},
 }
-
-godot.setup(config)
-
-local function map(m, k, v)
-	vim.keymap.set(m, k, v, { silent = true })
-end
-
-map("n", "<leader>dr", godot.debug)
-map("n", "<leader>dd", function()
-	package.loaded["godot.debugger"] = nil
-	godot = require("godot.debugger")
-	godot.setup(config)
-	godot.debug_at_cursor()
-end)
-map("n", "<leader>dq", godot.quit)
-map("n", "<leader>dc", godot.continue)
-map("n", "<leader>ds", godot.step)
-
+-------------------------------------------------------------------
+-- setup
+-- @param opts : see above
 M.setup = function(opts)
-	config = vim.tbl_deep_extend("force", config, (opts or {}))
+	config = vim.tbl_deep_extend("force", config, opts or {})
+	M.debugger.setup(config)
+
+    vim.api.nvim_create_user_command("GodotDebug", M.debugger.debug, {})
+    vim.api.nvim_create_user_command("GodotBreakAtCursor", M.debugger.debug_at_cursor, {})
+    vim.api.nvim_create_user_command("GodotStep", M.debugger.step, {})
+    vim.api.nvim_create_user_command("GodotQuit", M.debugger.quit,{})
+    vim.api.nvim_create_user_command("GodotContinue", M.debugger.continue,{})
 end
+
+M.setup()
 
 -- reload on run for debug stuff
 return M

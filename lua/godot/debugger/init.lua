@@ -4,26 +4,12 @@ local M = {}
 
 -------------------------------------------------------------------
 -- defaults
-local config = {
-	bin = "godot",
-	gui = {
-		-- @defaults
-		--	console_config = {
-		--	    relative = "editor",
-		--	   	anchor = "SW",
-		--	   	width = 99999,
-		--	   	height = 10,
-		--	   	col = 1,
-		--	   	row = 99999,
-		--	   	border = "double",
-		--	},
-	},
-}
+local config = {}
 -------------------------------------------------------------------
 -- setup
 M.setup = function(opts)
-	config = vim.tbl_deep_extend("force", config, opts)
-	gui.setup(config.gui)
+	config = opts
+	gui.setup(config)
 end
 -------------------------------------------------------------------
 local on_log = function(line)
