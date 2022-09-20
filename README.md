@@ -1,5 +1,5 @@
 # godot.nvim
-Break free of godots built-in editor prison and fly my friend!
+Break free of godots built-in editor prison and fly!
 
 [godotnvim.webm](https://user-images.githubusercontent.com/84206502/191308246-8d6d963f-1934-4339-ae87-dbec4d62e2f4.webm)
 
@@ -12,9 +12,8 @@ If you love godot, but require vim to stay sane, this if my offering to you.
 works with godot 3 and 4.
 
 # Plans
-Features comming soon:
-- new command! run-to-cursor in debug mode
-- pre-build configs for treesitter, lsp and external-editor support scripts.
+- run-to-cursor in debug mode
+- pre-build configs for treesitter, lsp and external-editor shell scripts.
 - might work with mono version. I think its the same cli. (currenlty checks for ".gd" file)
 
 This is my first nvim plugin, any help offered is appreciated.
