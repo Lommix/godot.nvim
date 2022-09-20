@@ -13,8 +13,8 @@ works with godot 3 and 4.
 
 # Plans
 - run-to-cursor in debug mode
-- pre-build configs for treesitter, lsp and external-editor shell scripts.
-- might work with mono version. I think its the same cli. (currenlty checks for ".gd" file)
+- pre-build configs for treesitter, lsp and external-editor shell scripts
+- mono support
 
 This is my first nvim plugin, any help offered is appreciated.
 I plan on working with godot and nvim for a long time to come.
