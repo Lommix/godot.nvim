@@ -14,6 +14,7 @@ local config = {
 			col = 1,
 			row = 99999,
 			border = "double",
+			style = "minimal",
 		},
 	},
 }
@@ -24,11 +25,11 @@ M.setup = function(opts)
 	config = vim.tbl_deep_extend("force", config, opts or {})
 	M.debugger.setup(config)
 
-    vim.api.nvim_create_user_command("GodotDebug", M.debugger.debug, {})
-    vim.api.nvim_create_user_command("GodotBreakAtCursor", M.debugger.debug_at_cursor, {})
-    vim.api.nvim_create_user_command("GodotStep", M.debugger.step, {})
-    vim.api.nvim_create_user_command("GodotQuit", M.debugger.quit,{})
-    vim.api.nvim_create_user_command("GodotContinue", M.debugger.continue,{})
+	vim.api.nvim_create_user_command("GodotDebug", M.debugger.debug, {})
+	vim.api.nvim_create_user_command("GodotBreakAtCursor", M.debugger.debug_at_cursor, {})
+	vim.api.nvim_create_user_command("GodotStep", M.debugger.step, {})
+	vim.api.nvim_create_user_command("GodotQuit", M.debugger.quit, {})
+	vim.api.nvim_create_user_command("GodotContinue", M.debugger.continue, {})
 end
 
 M.setup()
