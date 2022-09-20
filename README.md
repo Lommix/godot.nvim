@@ -1,20 +1,24 @@
 # godot.nvim
-break free of godots built-in editor prison and fly my friend!
+Break free of godots built-in editor prison and fly my friend!
 
 [godotnvim.webm](https://user-images.githubusercontent.com/84206502/191308246-8d6d963f-1934-4339-ae87-dbec4d62e2f4.webm)
 
 
 # Features
-mvp debugging directly in nvim. Start your application in debug mode. Quick debug with break-at-your-cursor support. Step, read and continue any time.
-For everybody who loves godot, but require vim to stay sane.
+Mvp debugging tool for nvim. Start your application in debug mode. Quick debug with break-at-cursor support. Step, read and continue any time.
+
+If you love godot, but require vim to stay sane, this if my offering to you.
 
 # Plans
-features comming soon:
+Features comming soon:
 - new command! run-to-cursor in debug mode
 - pre-build configs for treesitter, lsp and external-editor support scripts.
 
+This is my first nvim plugin, any help offered is appreciated.
+I plan on working with godot and nvim for a long time to come.
+
 # Installation
-currenlty relies on https://github.com/akinsho/toggleterm.nvim
+Currenlty relies on https://github.com/akinsho/toggleterm.nvim
 ```
 use('lommix/godot.nvim')
 ```
@@ -25,7 +29,7 @@ This plugin offers the following mappable commands:
 :GodotDebug :GodotBreakAtCursor :GodotStep :GodotQuit :GodotContinue
 ```
 
-here is my example configuration. Make sure to pass the correct path to the godot executable, if not linked in globals.
+Here is my example configuration. Make sure to pass the correct path to the godot executable. I linked mine in the shared globals.
 ```
 --godot.lua
 local ok, godot = pcall(require, "godot")
