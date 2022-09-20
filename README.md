@@ -9,10 +9,13 @@ Mvp debugging tool for nvim. Start your application in debug mode. Quick debug w
 
 If you love godot, but require vim to stay sane, this if my offering to you.
 
+works with godot 3 and 4.
+
 # Plans
 Features comming soon:
 - new command! run-to-cursor in debug mode
 - pre-build configs for treesitter, lsp and external-editor support scripts.
+- might work with mono version. I think its the same cli. (currenlty checks for ".gd" file)
 
 This is my first nvim plugin, any help offered is appreciated.
 I plan on working with godot and nvim for a long time to come.
@@ -30,6 +33,7 @@ This plugin offers the following mappable commands:
 ```
 
 Here is my example configuration. Make sure to pass the correct path to the godot executable. I linked mine in the shared globals.
+
 ```
 --godot.lua
 local ok, godot = pcall(require, "godot")
