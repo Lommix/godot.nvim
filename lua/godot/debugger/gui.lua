@@ -1,9 +1,9 @@
 local M = {}
 
 local a = vim.api
-local watcher_buffer = vim.api.nvim_create_buf(true, true)
+local watcher_buffer = nil
 local watcher_window = nil
-local console_buffer = vim.api.nvim_create_buf(true, true)
+local console_buffer = nil
 local console_window = nil
 local code_window = nil
 
@@ -11,7 +11,7 @@ local watcher_locals = {}
 local watcher_globals = {}
 local watcher_memebers = {}
 local watcher_trace = {}
-
+local console_line_counter = 0
 -------------------------------------------------------------------
 local config = {}
 -------------------------------------------------------------------
@@ -21,31 +21,44 @@ M.setup = function(opts)
 	code_window = a.nvim_get_current_win()
 end
 -------------------------------------------------------------------
--- build console
+-- close/open
 M.open_console = function()
+	console_buffer = vim.api.nvim_create_buf(false, true)
 	console_window = a.nvim_open_win(console_buffer, false, config.gui.console_config)
 	a.nvim_set_current_win(code_window)
 end
--------------------------------------------------------------------
--- build watcher
+
+M.close_console = function()
+	if console_buffer then
+		a.nvim_buf_delete(console_buffer, { force = true })
+		console_buffer = nil
+		console_window = nil
+		console_line_counter = 0
+	end
+end
 M.open_watcher = function()
+	a.nvim_set_current_win(code_window)
 	vim.cmd("vsplit")
+	watcher_buffer = vim.api.nvim_create_buf(false, true)
 	watcher_window = a.nvim_get_current_win()
 	a.nvim_win_set_buf(watcher_window, watcher_buffer)
-	a.nvim_set_current_win(code_window)
 end
--------------------------------------------------------------------
--- close consle
-M.close_console = function()
-	if console_window and a.nvim_win_is_valid(console_window) then
-		a.nvim_win_close(console_window, true)
+M.close_watcher = function()
+	if watcher_buffer then
+		a.nvim_buf_delete(watcher_buffer, { force = true })
+		watcher_buffer = nil
+		watcher_window = nil
 	end
 end
 -------------------------------------------------------------------
+-- build watcher
+-------------------------------------------------------------------
 M.set_trace = function(trace)
 	watcher_trace = trace
-	if trace[1] then
-		M.jump_cursor(trace[1])
+	for _, line in pairs(trace) do
+		if string.find(line, "*Frame.+res://") then
+			M.jump_cursor(line)
+		end
 	end
 end
 M.set_globals = function(globals)
@@ -56,19 +69,6 @@ M.set_members = function(members)
 end
 M.set_locals = function(locals)
 	watcher_locals = locals
-end
--------------------------------------------------------------------
--- close watcher
-M.close_watcher = function()
-	if watcher_window and a.nvim_win_is_valid(watcher_window) then
-		a.nvim_win_close(watcher_window, true)
-	end
-end
--------------------------------------------------------------------
--- close gui
-M.close_gui = function()
-	M.close_watcher()
-	M.close_console()
 end
 -------------------------------------------------------------------
 -- jump cursor
@@ -82,10 +82,11 @@ end
 -------------------------------------------------------------------
 -- print console
 M.console_log = function(line)
-	if console_window and a.nvim_win_is_valid(console_window) and string.len(line) then
+	if console_buffer and a.nvim_buf_is_valid(console_buffer) and string.len(line) then
 		local row = a.nvim_win_get_cursor(console_window)[1]
-		a.nvim_buf_set_lines(console_buffer, row + 1, row + 2, false, { line })
-		a.nvim_win_set_cursor(console_window, { row + 1, 0 })
+		a.nvim_buf_set_lines(console_buffer, console_line_counter + 1, console_line_counter + 2, false, { line })
+		a.nvim_win_set_cursor(console_window, { console_line_counter + 1, 0 })
+		console_line_counter = console_line_counter + 1
 	end
 end
 -------------------------------------------------------------------

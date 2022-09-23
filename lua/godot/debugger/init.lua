@@ -1,7 +1,8 @@
 local gui = require("godot.debugger.gui")
-local cli = require("godot.debugger.cli")
+local godot_job = require("godot.debugger.job")
 local M = {}
-
+local current_job = nil
+local debug_mode = false
 -------------------------------------------------------------------
 -- defaults
 local config = {}
@@ -17,16 +18,16 @@ local on_log = function(line)
 end
 -------------------------------------------------------------------
 local reload_watcher = function()
-	cli.request_globals(function(response)
+	godot_job:request("gv", function(response)
 		gui.set_globals(response)
 	end)
-	cli.request_members(function(response)
+	godot_job:request("mv", function(response)
 		gui.set_members(response)
 	end)
-	cli.request_locals(function(response)
+	godot_job:request("lv", function(response)
 		gui.set_locals(response)
 	end)
-	cli.request_trace(function(response)
+	godot_job:request("bt", function(response)
 		gui.set_trace(response)
 		gui.print_watcher()
 	end)
@@ -36,6 +37,27 @@ local on_enter_debug = function()
 	gui.open_watcher()
 	reload_watcher()
 end
+
+local start_job = function(command, cwd)
+	debug_mode = false
+	current_job = godot_job:new({
+		cmd = command,
+		cwd = "/home/lommix/Projects/PanzerChan",
+		on_log = function(line)
+			on_log(line)
+		end,
+		on_break = function()
+			if not debug_mode then
+				on_enter_debug()
+			end
+			debug_mode = true
+		end,
+		on_exit = function()
+			gui.close_console()
+			gui.close_watcher()
+		end,
+	})
+end
 -------------------------------------------------------------------
 -- debug at cursor
 M.debug_at_cursor = function()
@@ -43,28 +65,38 @@ M.debug_at_cursor = function()
 	local file = vim.fn.expand("%")
 	if not string.find(file, ".gd") then
 		do
-			print("cannot debug at cursor of none gdscript file")
+			print("this action requires gdscript")
 			return
 		end
 	end
-	local cmd = config.bin .. " -d -b res://" .. file .. ":" .. line
-	--debug
-	--local cmd = "godot -d -b res://addons/lommix_infinite_worlds/nodes/auto_tilemap.gd:67"
+
+	if current_job then
+		current_job:shutdown()
+	end
+
+	local command = {
+		config.bin,
+		"-d",
+		"-b",
+		"res://" .. file .. ":" .. line,
+	}
+	local cwd = vim.fn.getcwd()
 	gui.open_console()
-	cli.spawn(cmd, on_enter_debug, on_log)
+	start_job(command, cwd)
 end
 -------------------------------------------------------------------
 -- quit
 M.quit = function()
-	cli.quit(function()
-		gui.close_gui()
-	end)
+	current_job:shutdown()
 end
 -------------------------------------------------------------------
 -- step
 M.step = function()
-	cli.request_step(function(response)
+	current_job:request("s", function(response)
 		for _, line in pairs(response) do
+			if string.find(line, "Debugger Break,") then
+				break
+			end
 			gui.console_log(line)
 		end
 		reload_watcher()
@@ -74,18 +106,24 @@ end
 -- continue
 M.continue = function()
 	gui.close_watcher()
-	cli.continue(function()
-		gui.open_watcher()
-		reload_watcher()
+	current_job:request("c", function()
+		on_enter_debug()
 	end)
 end
-
 -------------------------------------------------------------------
 -- debug
 M.debug = function()
-	local cmd = config.bin .. " -d"
+	if current_job then
+		current_job:shutdown()
+	end
+
+	local command = {
+		config.bin,
+		"-d",
+	}
+	local cwd = vim.fn.getcwd()
 	gui.open_console()
-	cli.spawn(cmd, on_enter_debug, on_log)
+	start_job(command, cwd)
 end
 
 return M
