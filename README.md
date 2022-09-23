@@ -8,14 +8,13 @@ Break free from Godots built-in editor prison and fly!
 
 
 # Features
-Godot debugging tool for nvim. Start your application in debug mode. Quick debug with break-at-cursor support. Step, read and continue any time.
+Godot debugging tool for nvim. Run your application in debug, break on error or cursor. Step, read and continue.
 
 If you love godot, but require vim to stay sane, this if my offering to you.
 
 Works with godot 3 and 4.
 
 # Plans
-- run-to-cursor in debug mode
 - pre-build configs for treesitter, lsp and external-editor shell scripts
 - luasnips for gdscript.
 - mono support
