@@ -1,5 +1,8 @@
 # godot.nvim
-Break free from godots built-in editor prison and fly!
+
+![nvimgodotlogo](https://user-images.githubusercontent.com/84206502/192011201-988b79c3-e688-4c6d-b00b-720aadff35dc.png)
+
+Break free from Godots built-in editor prison and fly! 
 
 [godotnvim.webm](https://user-images.githubusercontent.com/84206502/191308246-8d6d963f-1934-4339-ae87-dbec4d62e2f4.webm)
 
