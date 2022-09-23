@@ -5,33 +5,32 @@ Break free from godots built-in editor prison and fly!
 
 
 # Features
-Mvp debugging tool for nvim. Start your application in debug mode. Quick debug with break-at-cursor support. Step, read and continue any time.
+Godot debugging tool for nvim. Start your application in debug mode. Quick debug with break-at-cursor support. Step, read and continue any time.
 
 If you love godot, but require vim to stay sane, this if my offering to you.
 
-works with godot 3 and 4.
+Works with godot 3 and 4.
 
 # Plans
 - run-to-cursor in debug mode
 - pre-build configs for treesitter, lsp and external-editor shell scripts
+- luasnips for gdscript.
 - mono support
 
-This is my first nvim plugin, any help offered is appreciated.
-I plan on working with godot and nvim for a long time to come.
 
 # Installation
-Currenlty relies on https://github.com/akinsho/toggleterm.nvim
+Any plugin manager will do.
 ```
 use('lommix/godot.nvim')
 ```
 
 # Config
-This plugin offers the following mappable commands:
+Plugin adds the following commands:
 ```
 :GodotDebug :GodotBreakAtCursor :GodotStep :GodotQuit :GodotContinue
 ```
 
-Here is my example configuration. Make sure to pass the correct path to the godot executable. I linked mine in the shared globals.
+Here is my example configuration. Make sure to pass the correct path to the godot executable.
 
 ```
 --godot.lua
