@@ -28,6 +28,12 @@ local on_stdout = function(job, buffer)
 		end
 
 		-- log
+        --  filter unwanted cli docs
+        if line == "Enter \"help\" for assistance." then
+            goto continue
+        end
+
+        -- log the rest
 		job.on_log(line)
 
 		::continue::

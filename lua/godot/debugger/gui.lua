@@ -72,6 +72,7 @@ M.set_locals = function(locals)
 end
 -------------------------------------------------------------------
 -- jump cursor
+-- Todo: check for override
 M.jump_cursor = function(trace)
 	local file_line = string.gsub(string.match(trace, "res://.+:%d+"), "res://", "")
 	local file, line = unpack(vim.split(file_line, ":"))
