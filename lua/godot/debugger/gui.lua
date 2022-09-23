@@ -96,7 +96,7 @@ M.print_watcher = function()
 	local text = {}
 
 	table.insert(text, "_________________________________________")
-	table.insert(text, "-- Godot Debugger 0.11")
+	table.insert(text, "-- Godot Debugger 1.0")
 
 	table.insert(text, "")
 	table.insert(text, "_________________________________________")
