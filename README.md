@@ -70,14 +70,16 @@ its pretty simple with nvim remote
 #create a bash script, make it executeable
 #give it a path to write commands into
 
+-- /home/lommix/openGodotFile.sh
 #!/bin/bash
 [ -n "$1" ] && file=$1
 nvim --server ~/.cache/nvim/godot.pipe --remote-send ':e '$file'<CR>'
+-- end
 
 #now start nvim in your project folder and listen to the pipe file:
 nvim --listen ~/.cache/nvim/godot.pipe .
 ```
-# Add external config to your editor settings with the path to the script
-![Screenshot from 2022-10-14 13-07-55](https://user-images.githubusercontent.com/84206502/195833862-5021c428-10dc-4bf4-bb57-de0e81f6b1ac.png)
+Add external config to your editor settings with the path to the script:
+![Screenshot from 2022-10-14 13-17-14](https://user-images.githubusercontent.com/84206502/195834456-41d65a9e-172b-4a45-a352-f976e2a19be8.png)
 
-done! if you click on the script icon in godot, nvim will open the file. Have fun!
+Done! if you click on the script icon in godot, nvim will open the file. Have fun!
