@@ -6,19 +6,12 @@ Break free from Godots built-in editor prison and fly!
 
 [godotnvim.webm](https://user-images.githubusercontent.com/84206502/191308246-8d6d963f-1934-4339-ae87-dbec4d62e2f4.webm)
 
+# Update! 
+With godot 4 comes dap integration, which is much better than my solution https://github.com/mfussenegger/nvim-dap
 
 # Features
-Godot debugging tool for nvim. Run your application in debug, break on error or cursor. Step, read and continue.
-
-If you love godot, but require vim to stay sane, this is my offering to you.
-
+Minimalist Godot debugging tool for nvim. Run your application in debug, break on error or cursor. 
 Works with godot 3 and 4.
-
-# Plans
-- pre-build configs for treesitter, lsp and external-editor shell scripts
-- luasnips for gdscript.
-- c# support
-
 
 # Installation
 Any plugin manager will do.
