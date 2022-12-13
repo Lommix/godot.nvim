@@ -42,7 +42,7 @@ local start_job = function(command, cwd)
 	debug_mode = false
 	current_job = godot_job:new({
 		cmd = command,
-		cwd = "/home/lommix/Projects/PanzerChan",
+		cwd = cwd,
 		on_log = function(line)
 			on_log(line)
 		end,
