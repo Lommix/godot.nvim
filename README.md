@@ -59,19 +59,19 @@ map("n", "<leader>ds", godot.debugger.step)
 
 # How to use nvim as external editor
 its pretty simple with nvim remote
-```
-#create a bash script, make it executeable
-#give it a path to write commands into
 
--- /home/lommix/openGodotFile.sh
+create a bash script, make it executeable. add the following context:
+```
 #!/bin/bash
 [ -n "$1" ] && file=$1
 nvim --server ~/.cache/nvim/godot.pipe --remote-send ':e '$file'<CR>'
--- end
+```
 
-#now start nvim in your project folder and listen to the pipe file:
+Now start nvim in your project folder and listen to the pipe file:
+```
 nvim --listen ~/.cache/nvim/godot.pipe .
 ```
+
 Add external config to your editor settings with the path to the script:
 ![Screenshot from 2022-10-14 13-17-14](https://user-images.githubusercontent.com/84206502/195834456-41d65a9e-172b-4a45-a352-f976e2a19be8.png)
 
