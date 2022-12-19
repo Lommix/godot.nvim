@@ -71,8 +71,10 @@ Now start nvim in your project folder and listen to the pipe file:
 ```
 nvim --listen ~/.cache/nvim/godot.pipe .
 ```
+Since you probably dont want to type out that huge path, each time you want to start nvim, make it another bashscript and add it to your globals.
+On my systems its simple named "gvim".
 
-Add external config to your editor settings with the path to the script:
+Add external config to your editor settings with the path to the first script:
 ![Screenshot from 2022-10-14 13-17-14](https://user-images.githubusercontent.com/84206502/195834456-41d65a9e-172b-4a45-a352-f976e2a19be8.png)
 
 Done! if you click on the script icon in godot, nvim will open the file. Have fun!
