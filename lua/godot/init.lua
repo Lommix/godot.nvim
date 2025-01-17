@@ -7,22 +7,42 @@ local config = {
 	bin = "godot",
 	gui = {
 		console_config = {
-			relative = "editor",
 			anchor = "SW",
-			width = 99999,
-			height = 10,
-			col = 1,
-			row = 99999,
 			border = "double",
+			col = 1,
+			height = 10,
+			relative = "editor",
+			row = 99999,
 			style = "minimal",
+			width = 99999,
 		},
 	},
+	pipepath = vim.fn.stdpath("cache") .. "/godot.pipe",
 }
+
+-- Check if the pipepath is already in the server list
+-- @param pipe : path to the pipe
+local function is_server_running(pipe)
+	local servers = vim.fn.serverlist()
+	for _, server in ipairs(servers) do
+		if server == pipe then
+			return true
+		end
+	end
+	return false
+end
+
 -------------------------------------------------------------------
 -- setup
 -- @param opts : see above
 M.setup = function(opts)
 	config = vim.tbl_deep_extend("force", config, opts or {})
+
+	-- If the server is running, "serverstart" automatically sets up Neovim to listen on the given pipe
+	if not vim.loop.fs_stat(config.pipepath) and not is_server_running(config.pipepath) then
+		vim.fn.serverstart(config.pipepath)
+	end
+
 	M.debugger.setup(config)
 
 	vim.api.nvim_create_user_command("GodotDebug", M.debugger.debug, {})
