@@ -11,12 +11,6 @@ local M = {}
 --- Sets up the GDScript LSP using lspconfig, optionally merging user config.
 -- @param opts table|nil A table of user overrides.
 function M.setup(opts)
-	local ok, lspconfig = pcall(require, "lspconfig")
-	if not ok then
-		-- Bail out if lspconfig is not available
-		return
-	end
-
 	-- Define defaults or merge additional config if desired
 	local default_config = {
 		lsp_opts = {},
@@ -24,8 +18,20 @@ function M.setup(opts)
 
 	local config = vim.tbl_deep_extend("force", default_config, opts or {})
 
-	-- Setup GDScript LSP with merged configuration
-	lspconfig.gdscript.setup(config.lsp_opts)
+	-- Call lspconfig for newer Neovim version (0.11+) with new vim.lsp.config call
+	-- but also enables previous lspconfig call. This prevents "deprecated" warnings
+	if vim.lsp.config then
+		vim.lsp.config("gdscript", config.lsp_opts)
+		vim.lsp.enable("gdscript")
+	else
+		local ok, lspconfig = pcall(require, "lspconfig")
+		if not ok then
+			-- Bail out if lspconfig is not available
+			return
+		end
+		-- Setup GDScript LSP with merged configuration
+		lspconfig.gdscript.setup(config.lsp_opts)
+	end
 end
 
 return M
